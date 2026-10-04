@@ -1,9 +1,9 @@
-name: NexVora CyberRun APK Build
+name: Android APK Build
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     container:
       image: barichello/godot-ci:4.4.1
 
@@ -18,93 +19,66 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Android environment
-        shell: bash
-        run: |
-          set -eux
-          echo "Java:"
-          java -version
-          echo "SDK:"
-          find / -name sdkmanager -type f 2>/dev/null | head
-          echo "Godot:"
-          godot --version
-
-      - name: Install export templates
-        shell: bash
-        run: |
-          set -eux
-          DEST="$HOME/.local/share/godot/export_templates/4.4.1.stable"
-          mkdir -p "$DEST"
-          wget -q \
-            https://downloads.tuxfamily.org/godotengine/4.4.1/Godot_v4.4.1-stable_export_templates.tpz \
-            -O /tmp/templates.tpz
-          mkdir -p /tmp/godot-templates
-          unzip -q /tmp/templates.tpz -d /tmp/godot-templates
-          cp -r /tmp/godot-templates/templates/. "$DEST/"
-          test -s "$DEST/android_debug.apk"
-          test -s "$DEST/android_release.apk"
-
-      - name: Configure Android export
+      - name: Install Godot Android Export Templates
         shell: bash
         run: |
           set -eux
 
-          JAVA_BIN="$(readlink -f "$(command -v javac)")"
-          JAVA_HOME_DIR="$(dirname "$(dirname "$JAVA_BIN")")"
+          GODOT_VERSION="4.4.1"
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
 
-          SDKMANAGER="$(find / -name sdkmanager -type f 2>/dev/null | head -1)"
-          if [ -z "$SDKMANAGER" ]; then
-            echo "Android SDK manager not found"
+          mkdir -p "$TEMPLATE_DIR"
+
+          URL="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+
+          echo "Downloading:"
+          echo "$URL"
+
+          curl -fL --retry 5 --retry-delay 3 "$URL" \
+            -o /tmp/templates.tpz
+
+          mkdir -p /tmp/godot_templates
+          tar -xf /tmp/templates.tpz -C /tmp/godot_templates
+
+          find /tmp/godot_templates -type f | head -20
+
+          TEMPLATE_ROOT="$(find /tmp/godot_templates -type d -name 'templates' | head -1)"
+
+          if [ -z "$TEMPLATE_ROOT" ]; then
+            echo "ERROR: Godot export templates were not found."
+            find /tmp/godot_templates -maxdepth 4 -type f
             exit 1
           fi
 
-          ANDROID_HOME_DIR="$(dirname "$(dirname "$(dirname "$SDKMANAGER")")")"
+          cp -r "$TEMPLATE_ROOT"/* "$TEMPLATE_DIR"/
 
-          mkdir -p "$HOME/.android"
-          keytool -genkeypair -noprompt \
-            -keystore "$HOME/.android/debug.keystore" \
-            -storepass android \
-            -alias androiddebugkey \
-            -keypass android \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
+          echo "Installed templates:"
+          find "$TEMPLATE_DIR" -maxdepth 2 -type f
 
-          mkdir -p "$HOME/.config/godot"
-          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
-          [gd_resource type="EditorSettings" format=3]
-          [resource]
-          export/android/java_sdk_path = "$JAVA_HOME_DIR"
-          export/android/android_sdk_path = "$ANDROID_HOME_DIR"
-          export/android/debug_keystore = "$HOME/.android/debug.keystore"
-          export/android/debug_keystore_user = "androiddebugkey"
-          export/android/debug_keystore_pass = "android"
-          EOF
-
-          echo "JAVA_HOME=$JAVA_HOME_DIR"
-          echo "ANDROID_HOME=$ANDROID_HOME_DIR"
-
-      - name: Validate project
+      - name: Check Project
         run: |
+          set -eux
+          godot --version
           test -f project.godot
-          test -f export_presets.cfg
-          mkdir -p build
-          godot --headless --editor --path . --quit
+          godot --headless --editor --quit
 
-      - name: Export APK
+      - name: Export Android APK
         run: |
-          godot --headless --path . \
-            --export-debug "Android" \
-            build/NexVoraCyberRun.apk
+          set -eux
 
-      - name: Verify APK
-        run: test -s build/NexVoraCyberRun.apk
+          mkdir -p build
+
+          godot --headless \
+            --path . \
+            --export-debug "Android" \
+            build/NexVoraCyberRun-debug.apk
+
+          test -f build/NexVoraCyberRun-debug.apk
+
+          ls -lh build/NexVoraCyberRun-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: NexVoraCyberRun-APK
-          path: build/NexVoraCyberRun.apk
-          if-no-files-found: error
-          retention-days: 14
+          name: NexVoraCyberRun-Android
+          path: build/NexVoraCyberRun-debug.apk
