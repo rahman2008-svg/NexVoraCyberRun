@@ -1,8 +1,9 @@
-name: Android APK Build
+name: NexVora CyberRun Android APK
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -17,98 +18,135 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Godot Export Templates
-        shell: bash
         run: |
           set -eux
 
           VERSION="4.4.1"
-          mkdir -p godot-templates
+
+          mkdir -p "$GITHUB_WORKSPACE/godot-templates"
 
           URL="https://github.com/godotengine/godot-builds/releases/download/${VERSION}-stable/Godot_v${VERSION}-stable_export_templates.tpz"
 
-          echo "Downloading Godot ${VERSION} export templates..."
-
-          wget -q --show-progress \
+          wget \
             --tries=5 \
             --timeout=60 \
             "$URL" \
-            -O godot-templates/templates.tpz
+            -O "$GITHUB_WORKSPACE/godot-templates/templates.tpz"
 
-          test -s godot-templates/templates.tpz
+          test -s "$GITHUB_WORKSPACE/godot-templates/templates.tpz"
 
-          echo "Template downloaded successfully:"
-          ls -lh godot-templates/templates.tpz
+          file "$GITHUB_WORKSPACE/godot-templates/templates.tpz"
 
-      - name: Prepare Godot Container
+      - name: Extract Export Templates
         run: |
           set -eux
 
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          mkdir -p "$GITHUB_WORKSPACE/godot-templates/extracted"
 
-          tar -xf godot-templates/templates.tpz \
-            -C "$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          unzip -q \
+            "$GITHUB_WORKSPACE/godot-templates/templates.tpz" \
+            -d "$GITHUB_WORKSPACE/godot-templates/extracted"
 
-          echo "Templates extracted:"
-          find "$HOME/.local/share/godot/export_templates/4.4.1.stable" \
-            -maxdepth 3 -type f | head -30
+          find "$GITHUB_WORKSPACE/godot-templates/extracted" \
+            -maxdepth 3 \
+            -type f \
+            -print
 
-      - name: Install Android Dependencies
+      - name: Check Project
+        run: |
+          set -eux
+          test -f project.godot
+          test -f export_presets.cfg
+
+      - name: Build Android APK
         run: |
           set -eux
 
-          sudo apt-get update
-          sudo apt-get install -y \
-            unzip \
-            openjdk-17-jdk \
-            wget
+          mkdir -p "$GITHUB_WORKSPACE/build"
 
-          java -version
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            -e HOME=/github/home \
+            barichello/godot-ci:4.4.1 \
+            bash -lc '
+              set -eux
 
-      - name: Validate Project
-        uses: addnab/docker-run-action@v3
-        with:
-          image: barichello/godot-ci:4.4.1
-          options: >-
-            -v ${{ github.workspace }}:/workspace
-            -w /workspace
-          run: |
-            set -eux
-            godot --version
-            test -f project.godot
-            godot --headless --editor --quit
+              echo "Godot version:"
+              godot --version
 
-      - name: Export Android APK
-        uses: addnab/docker-run-action@v3
-        with:
-          image: barichello/godot-ci:4.4.1
-          options: >-
-            -v ${{ github.workspace }}:/workspace
-            -w /workspace
-          run: |
-            set -eux
+              echo "Java:"
+              java -version
 
-            mkdir -p build
+              echo "Project:"
+              test -f project.godot
 
-            echo "Godot:"
-            godot --version
+              echo "Export presets:"
+              test -f export_presets.cfg
 
-            echo "Project:"
-            test -f project.godot
+              mkdir -p /github/home/.local/share/godot/export_templates/4.4.1.stable
 
-            echo "Export presets:"
-            grep -n "Android" export_presets.cfg || true
+              TEMPLATE_ROOT=$(find /workspace/godot-templates/extracted \
+                -type d \
+                -name templates \
+                | head -1)
 
-            godot --headless \
-              --path /workspace \
-              --export-debug "Android" \
-              /workspace/build/NexVoraCyberRun-debug.apk
+              if [ -z "$TEMPLATE_ROOT" ]; then
+                echo "ERROR: templates directory not found"
+                find /workspace/godot-templates/extracted -maxdepth 4 -type f
+                exit 1
+              fi
 
-            test -f /workspace/build/NexVoraCyberRun-debug.apk
+              cp -r "$TEMPLATE_ROOT"/. \
+                /github/home/.local/share/godot/export_templates/4.4.1.stable/
 
-            ls -lh /workspace/build/NexVoraCyberRun-debug.apk
+              echo "Installed templates:"
+              find /github/home/.local/share/godot/export_templates/4.4.1.stable \
+                -maxdepth 2 \
+                -type f
+
+              mkdir -p /github/home/.android
+
+              keytool -genkeypair -noprompt \
+                -keystore /github/home/.android/debug.keystore \
+                -storepass android \
+                -alias androiddebugkey \
+                -keypass android \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US"
+
+              mkdir -p /github/home/.config/godot
+
+              cat > /github/home/.config/godot/editor_settings-4.tres <<SETTINGS
+[gd_resource type="EditorSettings" format=3]
+
+[resource]
+export/android/debug_keystore = "/github/home/.android/debug.keystore"
+export/android/debug_keystore_user = "androiddebugkey"
+export/android/debug_keystore_pass = "android"
+SETTINGS
+
+              godot --headless \
+                --path /workspace \
+                --editor \
+                --quit
+
+              godot --headless \
+                --path /workspace \
+                --export-debug "Android" \
+                /workspace/build/NexVoraCyberRun-debug.apk
+
+              test -s /workspace/build/NexVoraCyberRun-debug.apk
+
+              ls -lh /workspace/build/NexVoraCyberRun-debug.apk
+            '
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: NexVoraCyberRun-Android
           path: build/NexVoraCyberRun-debug.apk
+          if-no-files-found: error
+          retention-days: 14
