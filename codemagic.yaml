@@ -23,14 +23,14 @@ workflows:
           mkdir -p "$GODOT_DIR"
 
           curl -L --fail --retry 5 \
-            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_macos.universal.zip" \
             -o /tmp/godot.zip
 
           unzip -q -o /tmp/godot.zip -d "$GODOT_DIR"
 
           GODOT_BIN=$(find "$GODOT_DIR" \
             -type f \
-            -name "Godot_v${GODOT_VERSION}-stable_linux.x86_64" \
+            -name "Godot.app/Contents/MacOS/Godot" \
             | head -1)
 
           test -n "$GODOT_BIN"
