@@ -131,10 +131,3 @@ workflows:
       - builds/NexVoraCyberRun-debug.apk
       - builds/**/*.apk
 
-    publishing:
-      email:
-        recipients:
-          - "$CM_COMMIT_AUTHOR_EMAIL"
-        notify:
-          success: true
-          failure: true
