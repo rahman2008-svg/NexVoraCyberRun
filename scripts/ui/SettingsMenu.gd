@@ -55,7 +55,7 @@ func _on_sfx_changed(value: float) -> void:
 	SaveManager.update_setting("sfx_volume", value / 100.0)
 
 func _on_quality_selected(index: int) -> void:
-	var q := ["low", "medium", "high"][index]
+	var q: Variant = ["low", "medium", "high"][index]
 	SaveManager.update_setting("quality", q)
 
 func _on_sensitivity_changed(value: float) -> void:
