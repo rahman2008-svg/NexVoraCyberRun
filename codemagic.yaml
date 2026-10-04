@@ -7,7 +7,6 @@ workflows:
     triggering:
       events:
         - push
-        - manual
       branch_patterns:
         - pattern: main
           include: true
