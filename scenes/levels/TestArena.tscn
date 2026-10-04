@@ -1,0 +1,194 @@
+[gd_scene load_steps=13 format=3 uid="uid://test_arena_nexvora"]
+
+[ext_resource type="PackedScene" path="res://scenes/player/Player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://scripts/managers/LevelManager.gd" id="2_level"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TouchControls.tscn" id="4_touch"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/SecurityDrone.tscn" id="5_drone"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PauseMenu.tscn" id="6_pause"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.08, 0.08, 0.12, 1)
+metallic = 0.7
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="BoxShape3D" id="BoxShape_floor"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="StandardMaterial3D" id="Mat_neon"]
+albedo_color = Color(0.0, 0.9, 1.0, 1)
+emission_enabled = true
+emission = Color(0.0, 0.8, 1.0, 1)
+emission_energy_multiplier = 2.5
+metallic = 0.8
+roughness = 0.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_platform"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape_platform"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_building"]
+albedo_color = Color(0.12, 0.1, 0.18, 1)
+metallic = 0.5
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_building"]
+size = Vector3(10, 20, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape_building"]
+size = Vector3(10, 20, 10)
+
+[sub_resource type="Environment" id="Environment_cyber"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.06, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.15, 0.1, 0.25, 1)
+ambient_light_energy = 0.4
+tonemap_mode = 2
+glow_enabled = true
+glow_intensity = 0.6
+glow_strength = 0.9
+glow_bloom = 0.3
+fog_enabled = true
+fog_light_color = Color(0.1, 0.05, 0.2, 1)
+fog_density = 0.008
+volumetric_fog_enabled = false
+
+[node name="TestArena" type="Node3D"]
+script = ExtResource("2_level")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_cyber")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 30, 0)
+light_color = Color(0.7, 0.75, 1.0, 1)
+light_energy = 0.8
+shadow_enabled = true
+directional_shadow_mode = 1
+
+[node name="Floor" type="StaticBody3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("BoxMesh_floor")
+surface_material_override/0 = SubResource("Mat_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("BoxShape_floor")
+
+[node name="Platforms" type="Node3D" parent="."]
+
+[node name="Platform1" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -15)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform1"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("Mat_neon")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform1"]
+shape = SubResource("BoxShape_platform")
+
+[node name="Platform2" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 7, -25)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform2"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("Mat_neon")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform2"]
+shape = SubResource("BoxShape_platform")
+
+[node name="Platform3" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 11, -35)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform3"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("Mat_neon")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform3"]
+shape = SubResource("BoxShape_platform")
+
+[node name="Platform4" type="StaticBody3D" parent="Platforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 16, -48)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Platforms/Platform4"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("Mat_neon")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Platforms/Platform4"]
+shape = SubResource("BoxShape_platform")
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="Building1" type="StaticBody3D" parent="Buildings"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 10, -10)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building1"]
+mesh = SubResource("BoxMesh_building")
+surface_material_override/0 = SubResource("Mat_building")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building1"]
+shape = SubResource("BoxShape_building")
+
+[node name="Building2" type="StaticBody3D" parent="Buildings"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 12, -20)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building2"]
+mesh = SubResource("BoxMesh_building")
+surface_material_override/0 = SubResource("Mat_building")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building2"]
+shape = SubResource("BoxShape_building")
+
+[node name="Building3" type="StaticBody3D" parent="Buildings"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 15, -40)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building3"]
+mesh = SubResource("BoxMesh_building")
+surface_material_override/0 = SubResource("Mat_building")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building3"]
+shape = SubResource("BoxShape_building")
+
+[node name="WallRunWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 5, -5)
+collision_layer = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="WallRunWall"]
+mesh = SubResource("BoxMesh_building")
+surface_material_override/0 = SubResource("Mat_neon")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallRunWall"]
+shape = SubResource("BoxShape_building")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 5)
+
+[node name="SecurityDrone" parent="." instance=ExtResource("5_drone")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 8, -20)
+
+[node name="SecurityDrone2" parent="." instance=ExtResource("5_drone")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 12, -30)
+
+[node name="HUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="TouchControls" parent="." instance=ExtResource("4_touch")]
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 5)
+
+[node name="PauseMenu" parent="." instance=ExtResource("6_pause")]

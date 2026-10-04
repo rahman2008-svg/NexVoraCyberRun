@@ -1,0 +1,81 @@
+[gd_scene load_steps=5 format=3 uid="uid://player_nexvora"]
+
+[ext_resource type="Script" path="res://scripts/player/PlayerController.gd" id="1_player"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_player"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_player"]
+albedo_color = Color(0.1, 0.9, 0.95, 1)
+metallic = 0.6
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.0, 0.6, 0.7, 1)
+emission_energy_multiplier = 0.4
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 1
+collision_mask = 22
+floor_stop_on_slope = true
+floor_max_angle = 0.9
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_player")
+surface_material_override/0 = SubResource("StandardMaterial3D_player")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+spring_length = 4.0
+margin = 0.3
+collision_mask = 2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+current = true
+fov = 70.0
+near = 0.1
+far = 400.0
+
+[node name="WallRayLeft" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 1.0, 0)
+target_position = Vector3(-0.8, 0, 0)
+collision_mask = 2
+enabled = true
+
+[node name="WallRayRight" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.0, 0)
+target_position = Vector3(0.8, 0, 0)
+collision_mask = 2
+enabled = true
+
+[node name="ClimbRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -0.5)
+target_position = Vector3(0, 0.8, -0.6)
+collision_mask = 2
+enabled = true
+
+[node name="GrappleRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+target_position = Vector3(0, 0, -25)
+collision_mask = 2
+enabled = true
+
+[node name="FloorRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+target_position = Vector3(0, -0.3, 0)
+collision_mask = 2
+enabled = true

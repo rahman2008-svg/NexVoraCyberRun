@@ -1,0 +1,164 @@
+[gd_scene load_steps=3 format=3 uid="uid://main_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="Style_button"]
+bg_color = Color(0.05, 0.15, 0.25, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.0, 0.85, 1.0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 20
+content_margin_top = 12
+content_margin_right = 20
+content_margin_bottom = 12
+
+[sub_resource type="StyleBoxFlat" id="Style_button_hover"]
+bg_color = Color(0.0, 0.4, 0.55, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 1.0, 1.0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 20
+content_margin_top = 12
+content_margin_right = 20
+content_margin_bottom = 12
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.08, 1)
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 80.0
+offset_right = 300.0
+offset_bottom = 160.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.0, 0.95, 1.0, 1)
+theme_override_font_sizes/font_size = 52
+text = "NEXVORA CYBERRUN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = 150.0
+offset_right = 250.0
+offset_bottom = 180.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.7, 0.5, 1.0, 1)
+theme_override_font_sizes/font_size = 18
+text = "Advanced 3D Cyberpunk Parkour"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -80.0
+offset_right = 140.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+theme_override_font_sizes/font_size = 22
+text = "START MISSION"
+
+[node name="FreeRoamButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+theme_override_font_sizes/font_size = 20
+text = "FREE ROAM"
+
+[node name="SettingsButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+theme_override_font_sizes/font_size = 20
+text = "SETTINGS"
+
+[node name="QuitButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("Style_button")
+theme_override_styles/hover = SubResource("Style_button_hover")
+theme_override_styles/pressed = SubResource("Style_button_hover")
+theme_override_font_sizes/font_size = 20
+text = "QUIT"
+
+[node name="VersionLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -40.0
+offset_right = -20.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.5, 0.5, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+text = "v1.0.0"
+horizontal_alignment = 2
+
+[node name="DeveloperLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -40.0
+offset_right = 400.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.4, 0.4, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "Developer: Prince AR Abdur Rahman"
